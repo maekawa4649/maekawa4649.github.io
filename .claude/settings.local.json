@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m http.server 8791)",
+      "Bash(taskkill //F //IM python.exe //T)",
+      "Bash(python -m http.server 8792)"
+    ]
+  }
+}

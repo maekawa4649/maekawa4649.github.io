@@ -1,0 +1,193 @@
+:root {
+  --accent: #2563eb;
+  --accent-light: #60a5fa;
+  --bg: #ffffff;
+  --text: #1f2933;
+  --muted: #6b7280;
+  --card-bg: #f8fafc;
+  --border: #e5e7eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --card-bg: #1e293b;
+    --border: #334155;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Hiragino Kaku Gothic ProN", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 1.5rem 3rem;
+  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%);
+}
+
+.avatar {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fade-in-up 0.6s ease both;
+}
+
+.avatar:hover {
+  transform: scale(1.06) rotate(-2deg);
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 2rem;
+  animation: fade-in-up 0.6s ease 0.1s both;
+}
+
+.hero .role {
+  margin: 0.4rem 0 0;
+  color: var(--accent-light);
+  font-weight: 500;
+  animation: fade-in-up 0.6s ease 0.2s both;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-light);
+  box-shadow: 0 12px 24px -12px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* スクロールで画面内に入るまで非表示にし、script.js の IntersectionObserver で
+   .is-visible を付与してフェードインさせる演出用クラス */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  border-left: 4px solid var(--accent);
+  padding-left: 0.6rem;
+}
+
+.card p {
+  color: var(--text);
+  margin-bottom: 0;
+}
+
+.skill-group {
+  margin-top: 1.5rem;
+}
+
+.skill-group:first-of-type {
+  margin-top: 1rem;
+}
+
+.skill-group h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.skill-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-list li {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.skill-list li:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* 「アニメーション減らす」設定のユーザーには演出を無効化する */
+@media (prefers-reduced-motion: reduce) {
+  .avatar,
+  .hero h1,
+  .hero .role,
+  .card,
+  .skill-list li,
+  .reveal {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ポモドーロタイマー</title>
+<style>
+  :root {
+    --work-color: #e74c3c;
+    --short-color: #27ae60;
+    --long-color: #2980b9;
+    --bg: #1e1e2f;
+    --card-bg: #2a2a40;
+    --text: #f5f5f5;
+    --muted: #9a9ab0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    color: var(--text);
+    transition: background 0.4s ease;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 40px 48px;
+    width: 380px;
+    max-width: 90vw;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 24px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .mode-tab {
+    flex: 1;
+    padding: 10px 6px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .mode-tab.active {
+    background: rgba(255,255,255,0.12);
+    color: var(--text);
+  }
+  .timer-display {
+    font-size: 72px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 10px 0 8px;
+    letter-spacing: 2px;
+  }
+  .session-label {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 28px;
+    min-height: 20px;
+  }
+  .progress-ring {
+    margin: 0 auto 28px;
+    display: block;
+  }
+  .controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  button.ctrl {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+  button.ctrl:active { transform: scale(0.96); }
+  #startPauseBtn {
+    background: linear-gradient(135deg, var(--work-color), #ff7b6b);
+    color: white;
+    min-width: 120px;
+  }
+  #resetBtn {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+  }
+  .settings {
+    margin-top: 28px;
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 20px;
+  }
+  .settings label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .settings input {
+    width: 56px;
+    text-align: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 6px 4px;
+    font-size: 14px;
+  }
+  .cycle-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.3s ease;
+  }
+  .dot.done { background: var(--work-color); }
+  .toggle-row {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .toggle-label input {
+    accent-color: var(--work-color);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+  }
+  .notify-status {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    min-height: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🍅 POMODORO TIMER</h1>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="work">作業</button>
+    <button class="mode-tab" data-mode="short">小休憩</button>
+    <button class="mode-tab" data-mode="long">長休憩</button>
+  </div>
+
+  <svg class="progress-ring" width="200" height="200">
+    <circle cx="100" cy="100" r="88" stroke="rgba(255,255,255,0.08)" stroke-width="10" fill="none"/>
+    <circle id="ringProgress" cx="100" cy="100" r="88" stroke="#e74c3c" stroke-width="10" fill="none"
+      stroke-linecap="round" transform="rotate(-90 100 100)"/>
+  </svg>
+
+  <div class="timer-display" id="display" style="margin-top:-160px;">25:00</div>
+  <div class="session-label" id="sessionLabel">作業に集中しましょう</div>
+
+  <div class="cycle-dots" id="cycleDots"></div>
+
+  <div class="controls">
+    <button class="ctrl" id="startPauseBtn">開始</button>
+    <button class="ctrl" id="resetBtn">リセット</button>
+  </div>
+
+  <div class="settings">
+    <label>作業(分)
+      <input type="number" id="workInput" value="25" min="1" max="90">
+    </label>
+    <label>小休憩(分)
+      <input type="number" id="shortInput" value="5" min="1" max="30">
+    </label>
+    <label>長休憩(分)
+      <input type="number" id="longInput" value="15" min="1" max="60">
+    </label>
+  </div>
+
+  <div class="toggle-row">
+    <label class="toggle-label">
+      <input type="checkbox" id="notifyToggle" checked> 通知を有効化
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="autoStartToggle" checked> 次のタイマーを自動開始
+    </label>
+  </div>
+  <div class="notify-status" id="notifyStatus"></div>
+</div>
+
+<audio id="beep" preload="auto">
+  <source src="data:audio/wav;base64,UklGRl9vT18AWEFWRmZtdCAQAAAAAQABAEARAACAlAEAgAAgABgAgAG" type="audio/wav">
+</audio>
+
+<script>
+(() => {
+  const modes = {
+    work:  { label: '作業に集中しましょう', color: '#e74c3c' },
+    short: { label: 'ちょっと一息つきましょう', color: '#27ae60' },
+    long:  { label: 'ゆっくり休みましょう', color: '#2980b9' },
+  };
+
+  let currentMode = 'work';
+  let totalSeconds = 25 * 60;
+  let remaining = totalSeconds;
+  let running = false;
+  let timerId = null;
+  let completedWorkSessions = 0; // out of 4 before long break
+
+  const display = document.getElementById('display');
+  const sessionLabel = document.getElementById('sessionLabel');
+  const startPauseBtn = document.getElementById('startPauseBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const modeTabs = document.querySelectorAll('.mode-tab');
+  const ring = document.getElementById('ringProgress');
+  const cycleDotsEl = document.getElementById('cycleDots');
+  const workInput = document.getElementById('workInput');
+  const shortInput = document.getElementById('shortInput');
+  const longInput = document.getElementById('longInput');
+  const beep = document.getElementById('beep');
+  const notifyToggle = document.getElementById('notifyToggle');
+  const autoStartToggle = document.getElementById('autoStartToggle');
+  const notifyStatus = document.getElementById('notifyStatus');
+
+  const CIRC = 2 * Math.PI * 88;
+  ring.style.strokeDasharray = CIRC;
+
+  function updateNotifyStatus() {
+    if (!('Notification' in window)) {
+      notifyStatus.textContent = 'このブラウザは通知に対応していません';
+      notifyToggle.checked = false;
+      notifyToggle.disabled = true;
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      notifyStatus.textContent = '通知がブロックされています。ブラウザの設定から許可してください';
+    } else if (Notification.permission === 'default') {
+      notifyStatus.textContent = 'タイマー開始時に通知の許可を求めます';
+    } else {
+      notifyStatus.textContent = '';
+    }
+  }
+
+  function ensureNotificationPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().then(updateNotifyStatus);
+    }
+  }
+
+  function notify(title, body) {
+    if (!notifyToggle.checked) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    try {
+      const n = new Notification(title, {
+        body,
+        icon: '🍅',
+        tag: 'pomodoro-timer'
+      });
+      setTimeout(() => n.close(), 8000);
+    } catch (e) {}
+  }
+
+  updateNotifyStatus();
+
+  function getMinutesForMode(mode) {
+    if (mode === 'work') return parseInt(workInput.value) || 25;
+    if (mode === 'short') return parseInt(shortInput.value) || 5;
+    return parseInt(longInput.value) || 15;
+  }
+
+  function renderDots() {
+    cycleDotsEl.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i < completedWorkSessions % 4 ? ' done' : '');
+      cycleDotsEl.appendChild(d);
+    }
+  }
+
+  function updateDisplay() {
+    const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+    const s = Math.floor(remaining % 60).toString().padStart(2, '0');
+    display.textContent = `${m}:${s}`;
+    document.title = `${m}:${s} - ポモドーロタイマー`;
+
+    const progress = 1 - remaining / totalSeconds;
+    ring.style.strokeDashoffset = CIRC * (1 - progress);
+  }
+
+  function setMode(mode, resetTimer = true) {
+    currentMode = mode;
+    modeTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.mode === mode));
+    ring.setAttribute('stroke', modes[mode].color);
+    document.documentElement.style.setProperty('--work-color', modes[mode].color);
+    sessionLabel.textContent = modes[mode].label;
+
+    if (resetTimer) {
+      pause();
+      totalSeconds = getMinutesForMode(mode) * 60;
+      remaining = totalSeconds;
+      updateDisplay();
+    }
+  }
+
+  function tick() {
+    remaining -= 1;
+    updateDisplay();
+    if (remaining <= 0) {
+      pause();
+      try { beep.currentTime = 0; beep.play().catch(() => {}); } catch (e) {}
+      handleSessionComplete();
+    }
+  }
+
+  function handleSessionComplete() {
+    let nextMode;
+    if (currentMode === 'work') {
+      completedWorkSessions++;
+      renderDots();
+      nextMode = completedWorkSessions % 4 === 0 ? 'long' : 'short';
+    } else {
+      nextMode = 'work';
+    }
+
+    notify(
+      `${modes[currentMode].label.replace(/しましょう$/, '')}完了！`,
+      `次は「${nextMode === 'work' ? '作業' : nextMode === 'short' ? '小休憩' : '長休憩'}」(${getMinutesForMode(nextMode)}分)です`
+    );
+
+    setMode(nextMode);
+
+    if (autoStartToggle.checked) {
+      start();
+    }
+  }
+
+  function start() {
+    if (running) return;
+    ensureNotificationPermission();
+    running = true;
+    startPauseBtn.textContent = '一時停止';
+    timerId = setInterval(tick, 1000);
+  }
+
+  function pause() {
+    running = false;
+    startPauseBtn.textContent = '開始';
+    clearInterval(timerId);
+  }
+
+  function reset() {
+    pause();
+    totalSeconds = getMinutesForMode(currentMode) * 60;
+    remaining = totalSeconds;
+    updateDisplay();
+  }
+
+  startPauseBtn.addEventListener('click', () => {
+    running ? pause() : start();
+  });
+
+  resetBtn.addEventListener('click', reset);
+
+  notifyToggle.addEventListener('change', () => {
+    if (notifyToggle.checked) ensureNotificationPermission();
+    updateNotifyStatus();
+  });
+
+  modeTabs.forEach(tab => {
+    tab.addEventListener('click', () => setMode(tab.dataset.mode));
+  });
+
+  [workInput, shortInput, longInput].forEach(input => {
+    input.addEventListener('change', () => {
+      if (!running) {
+        totalSeconds = getMinutesForMode(currentMode) * 60;
+        remaining = totalSeconds;
+        updateDisplay();
+      }
+    });
+  });
+
+  renderDots();
+  setMode('work');
+})();
+</script>
+
+</body>
+</html>
