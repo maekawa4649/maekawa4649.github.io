@@ -2,8 +2,18 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ポモドーロタイマー</title>
+
+<!-- PWA: ホーム画面に追加して単独アプリのように起動できるようにする -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e1e2f">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pomodoro">
+
 <style>
   :root {
     --work-color: #e74c3c;
@@ -174,9 +184,34 @@
     color: var(--muted);
     min-height: 14px;
   }
+  .complete-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 18px 20px;
+    padding-top: max(18px, env(safe-area-inset-top));
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.5;
+    color: white;
+    background: var(--work-color);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    transform: translateY(-120%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    cursor: pointer;
+  }
+  .complete-banner.show {
+    transform: translateY(0);
+  }
 </style>
 </head>
 <body>
+
+<!-- Notification API非対応ブラウザ(iOS Safari/Chrome等)向けの視覚フォールバック通知 -->
+<div id="completeBanner" class="complete-banner" role="alert" aria-live="assertive"></div>
 
 <div class="card">
   <h1>🍅 POMODORO TIMER</h1>
@@ -243,7 +278,10 @@
   let remaining = totalSeconds;
   let running = false;
   let timerId = null;
+  let endTime = null; // Date.now() + remaining*1000。実行中のみセットし、経過時刻から逆算することでバックグラウンド遷移時のずれを吸収する
   let completedWorkSessions = 0; // out of 4 before long break
+  let wakeLock = null; // 画面消灯によるタイマー停止(に見える現象)を防ぐためのScreen Wake Lock
+  let titleFlashId = null;
 
   const display = document.getElementById('display');
   const sessionLabel = document.getElementById('sessionLabel');
@@ -259,19 +297,20 @@
   const notifyToggle = document.getElementById('notifyToggle');
   const autoStartToggle = document.getElementById('autoStartToggle');
   const notifyStatus = document.getElementById('notifyStatus');
+  const completeBanner = document.getElementById('completeBanner');
 
   const CIRC = 2 * Math.PI * 88;
   ring.style.strokeDasharray = CIRC;
 
+  // iOSのChrome/SafariはWebKit採用のためNotification APIそのものが存在しない。
+  // その場合でもチェックボックスは有効なままにし、画面バナー・タイトル点滅・振動でお知らせする。
   function updateNotifyStatus() {
     if (!('Notification' in window)) {
-      notifyStatus.textContent = 'このブラウザは通知に対応していません';
-      notifyToggle.checked = false;
-      notifyToggle.disabled = true;
+      notifyStatus.textContent = 'この端末は通知APIに未対応です(iOSのSafari/Chrome等)。画面表示・音・振動でお知らせします';
       return;
     }
     if (Notification.permission === 'denied') {
-      notifyStatus.textContent = '通知がブロックされています。ブラウザの設定から許可してください';
+      notifyStatus.textContent = '通知がブロックされています。画面表示・音でお知らせします';
     } else if (Notification.permission === 'default') {
       notifyStatus.textContent = 'タイマー開始時に通知の許可を求めます';
     } else {
@@ -286,19 +325,85 @@
     }
   }
 
+  let bannerTimeoutId = null;
+  function showCompleteBanner(text) {
+    completeBanner.textContent = text;
+    completeBanner.classList.add('show');
+    clearTimeout(bannerTimeoutId);
+    bannerTimeoutId = setTimeout(() => completeBanner.classList.remove('show'), 6000);
+  }
+  completeBanner.addEventListener('click', () => {
+    completeBanner.classList.remove('show');
+    stopTitleFlash();
+  });
+
+  // タブを開いていない間はネイティブ通知が使えない環境もあるため、
+  // タブに戻ってきた瞬間に気づけるようタイトルを点滅させる
+  function startTitleFlash(text) {
+    stopTitleFlash();
+    let toggle = false;
+    titleFlashId = setInterval(() => {
+      document.title = toggle ? text : `${display.textContent} - ポモドーロタイマー`;
+      toggle = !toggle;
+    }, 1000);
+  }
+  function stopTitleFlash() {
+    if (titleFlashId) {
+      clearInterval(titleFlashId);
+      titleFlashId = null;
+      document.title = `${display.textContent} - ポモドーロタイマー`;
+    }
+  }
+
   function notify(title, body) {
     if (!notifyToggle.checked) return;
+
+    showCompleteBanner(`${title}\n${body}`);
+    startTitleFlash(`⏰ ${title}`);
+
+    if ('vibrate' in navigator) {
+      navigator.vibrate([200, 100, 200]);
+    }
+
     if (!('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
     try {
       const n = new Notification(title, {
         body,
-        icon: '🍅',
+        icon: 'icons/icon-192.png',
         tag: 'pomodoro-timer'
       });
       setTimeout(() => n.close(), 8000);
     } catch (e) {}
   }
+
+  // 画面ロック/スリープでタイマーが止まって見える現象への対策。
+  // 実行中は画面のスリープを止め、タブがバックグラウンドで再取得できない場合も
+  // 可視化復帰時(visibilitychange)に再取得を試みる
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } catch (e) {
+      wakeLock = null;
+    }
+  }
+  function releaseWakeLock() {
+    if (wakeLock) {
+      wakeLock.release().catch(() => {});
+      wakeLock = null;
+    }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      stopTitleFlash();
+      if (running) {
+        tick(); // 経過時刻から残り時間を再計算し、表示のずれを即座に補正
+        requestWakeLock(); // タブ切り替えで自動解放されるため再取得
+      }
+    }
+  });
 
   updateNotifyStatus();
 
@@ -321,7 +426,10 @@
     const m = Math.floor(remaining / 60).toString().padStart(2, '0');
     const s = Math.floor(remaining % 60).toString().padStart(2, '0');
     display.textContent = `${m}:${s}`;
-    document.title = `${m}:${s} - ポモドーロタイマー`;
+    // タイトル点滅中はここでタイトルを上書きしない(点滅側が display.textContent を見て制御する)
+    if (!titleFlashId) {
+      document.title = `${m}:${s} - ポモドーロタイマー`;
+    }
 
     const progress = 1 - remaining / totalSeconds;
     ring.style.strokeDashoffset = CIRC * (1 - progress);
@@ -343,7 +451,8 @@
   }
 
   function tick() {
-    remaining -= 1;
+    if (!running) return;
+    remaining = Math.max(0, Math.round((endTime - Date.now()) / 1000));
     updateDisplay();
     if (remaining <= 0) {
       pause();
@@ -379,19 +488,25 @@
     ensureNotificationPermission();
     running = true;
     startPauseBtn.textContent = '一時停止';
-    timerId = setInterval(tick, 1000);
+    endTime = Date.now() + remaining * 1000;
+    requestWakeLock();
+    // setIntervalは1000msより短い周期にしておくと、間隔のずれが蓄積しても
+    // 表示上の遅延が目立ちにくい(実際の残り時間は常にendTimeから逆算する)
+    timerId = setInterval(tick, 250);
   }
 
   function pause() {
     running = false;
     startPauseBtn.textContent = '開始';
     clearInterval(timerId);
+    releaseWakeLock();
   }
 
   function reset() {
     pause();
     totalSeconds = getMinutesForMode(currentMode) * 60;
     remaining = totalSeconds;
+    endTime = null;
     updateDisplay();
   }
 
