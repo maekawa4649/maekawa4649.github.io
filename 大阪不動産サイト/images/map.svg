@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" role="img" aria-label="大阪不動産ナビの活動エリアを示す地図イメージ">
+  <rect width="1200" height="500" fill="#e7e2d4"/>
+  <g stroke="#c9c1ab" stroke-width="3">
+    <line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="260" x2="1200" y2="260"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="200" y1="0" x2="200" y2="500"/>
+    <line x1="500" y1="0" x2="500" y2="500"/>
+    <line x1="800" y1="0" x2="800" y2="500"/>
+    <line x1="1000" y1="0" x2="1000" y2="500"/>
+  </g>
+  <circle cx="600" cy="230" r="140" fill="#c99a68" opacity="0.35"/>
+  <circle cx="600" cy="230" r="10" fill="#16294f"/>
+  <text x="600" y="300" text-anchor="middle" font-family="'Noto Sans JP',sans-serif" font-size="22" font-weight="700" fill="#16294f">大阪市内・北摂・堺エリアで活動中</text>
+  <text x="600" y="40" text-anchor="middle" font-family="'Noto Sans JP',sans-serif" font-size="18" fill="#6b6f76">MAP IMAGE SAMPLE</text>
+</svg>

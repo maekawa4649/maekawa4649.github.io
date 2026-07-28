@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="リビングルームのイメージ">
+  <rect width="800" height="600" fill="#f2ede2"/>
+  <rect x="0" y="0" width="800" height="360" fill="#e2d9c4"/>
+  <rect x="60" y="60" width="300" height="220" fill="#cddaf0" stroke="#16294f" stroke-width="6"/>
+  <rect x="90" y="90" width="120" height="80" fill="#a9bede"/>
+  <rect x="230" y="90" width="120" height="80" fill="#a9bede"/>
+  <rect x="90" y="190" width="120" height="80" fill="#a9bede"/>
+  <rect x="230" y="190" width="120" height="80" fill="#a9bede"/>
+  <rect x="120" y="360" width="560" height="180" rx="10" fill="#8b6b4a"/>
+  <rect x="150" y="330" width="500" height="60" rx="10" fill="#a9784f"/>
+  <rect x="500" y="300" width="180" height="120" rx="6" fill="#16294f" opacity="0.85"/>
+  <circle cx="590" cy="360" r="26" fill="#c99a68"/>
+  <text x="400" y="580" text-anchor="middle" font-family="'Noto Sans JP',sans-serif" font-size="20" fill="#6b6f76">ROOM IMAGE SAMPLE</text>
+</svg>
