@@ -81,11 +81,13 @@ function initContactForm() {
 }
 
 /**
- * 物件一覧ページの絞り込み(エリア/間取り/賃料/こだわり条件、すべてチェックボックスの複数選択)。
+ * 物件一覧ページの絞り込み。
+ * エリア/間取り/こだわり条件はチェックボックスの複数選択、賃料上限はプルダウン(単一選択)。
  * バックエンドを持たないため、各物件カードの data-* 属性を
  * JavaScript側で読み取りクライアントサイドで絞り込みを行う。
- * 同じ項目内の複数選択は「いずれかに一致(OR)」、項目をまたぐ場合は「すべてに一致(AND)」。
+ * チェックボックス項目内の複数選択は「いずれかに一致(OR)」、項目をまたぐ場合は「すべてに一致(AND)」。
  * こだわり条件のみ、選んだ条件をすべて満たす物件だけを表示する(AND)。
+ * 賃料上限は「選んだ金額以下」の物件だけを表示する。
  */
 function initPropertyFilter() {
   const bar = document.querySelector("#filter-bar");
@@ -95,9 +97,9 @@ function initPropertyFilter() {
   const countEl = document.querySelector("#result-count");
   const areaEls = Array.from(document.querySelectorAll('input[name="area"]'));
   const madoriEls = Array.from(document.querySelectorAll('input[name="madori"]'));
-  const rentEls = Array.from(document.querySelectorAll('input[name="rentband"]'));
   const featureEls = Array.from(document.querySelectorAll('input[name="feature"]'));
-  const allCheckboxes = [...areaEls, ...madoriEls, ...rentEls, ...featureEls];
+  const rentSelect = document.querySelector('select[name="rentmax"]');
+  const allCheckboxes = [...areaEls, ...madoriEls, ...featureEls];
 
   // URLパラメータ(トップページの検索ボックスからの遷移)を初期値に反映
   const params = new URLSearchParams(window.location.search);
@@ -109,8 +111,14 @@ function initPropertyFilter() {
   }
   checkFromParam("area", areaEls);
   checkFromParam("madori", madoriEls);
-  checkFromParam("rentband", rentEls);
   checkFromParam("feature", featureEls);
+
+  if (rentSelect) {
+    const rentParam = params.get("rentmax");
+    if (rentParam && Array.from(rentSelect.options).some((opt) => opt.value === rentParam)) {
+      rentSelect.value = rentParam;
+    }
+  }
 
   function checkedValues(elements) {
     return elements.filter((el) => el.checked).map((el) => el.value);
@@ -119,15 +127,15 @@ function initPropertyFilter() {
   function applyFilter() {
     const activeAreas = checkedValues(areaEls);
     const activeMadoris = checkedValues(madoriEls);
-    const activeRentBands = checkedValues(rentEls);
     const activeFeatures = checkedValues(featureEls);
+    const rentMax = rentSelect && rentSelect.value ? Number(rentSelect.value) : null;
     let visibleCount = 0;
 
     cards.forEach((card) => {
       const cardFeatures = card.dataset.features ? card.dataset.features.split(",") : [];
       const matchesArea = activeAreas.length === 0 || activeAreas.includes(card.dataset.area);
       const matchesMadori = activeMadoris.length === 0 || activeMadoris.includes(card.dataset.madori);
-      const matchesRent = activeRentBands.length === 0 || activeRentBands.includes(card.dataset.rentBand);
+      const matchesRent = rentMax === null || Number(card.dataset.rent) <= rentMax;
       const matchesFeatures = activeFeatures.every((f) => cardFeatures.includes(f));
       const isVisible = matchesArea && matchesMadori && matchesRent && matchesFeatures;
 
@@ -146,13 +154,15 @@ function initPropertyFilter() {
     allCheckboxes.forEach((checkbox) => {
       checkbox.checked = false;
     });
+    if (rentSelect) rentSelect.value = "";
     applyFilter();
   });
 
-  // チェックボックスは選んだ瞬間に絞り込みを反映する
+  // チェックボックス/プルダウンは選んだ瞬間に絞り込みを反映する
   allCheckboxes.forEach((checkbox) => {
     checkbox.addEventListener("change", applyFilter);
   });
+  rentSelect?.addEventListener("change", applyFilter);
 
   applyFilter();
 }

@@ -1,29 +1,36 @@
 /* ==========================================================================
    サイト生成スクリプト
    ------------------------------------------------------------------------
-   bukken.json の物件データから、以下を自動生成します。
-     - js/properties-data.js(物件一覧・チャットボット共通のデータ)
-     - images/UMxxx.svg(物件ごとのダミー外観イラスト)
+   data/bukken.json の物件データから、以下を自動生成します。
+     - assets/images/UMxxx.svg(物件ごとのダミー外観イラスト)
      - properties.html(物件一覧ページ)
-     - property-UMxxx.html(物件詳細ページ、1件につき1ページ)
+     - properties/UMxxx.html(物件詳細ページ、1件につき1ページ)
      - scripts/pickup-snippet.html / contact-options-snippet.html
        (index.html・contact.html は手動更新のため、参考スニペットのみ出力)
 
-   使い方: bukken.json を編集したら、このファイルがあるフォルダの一つ上
-   (大阪不動産サイト/)で次を実行してください。
+   使い方: data/bukken.json を編集したら、このファイルがあるフォルダの
+   一つ上(大阪不動産サイト/)で次を実行してください。
      node scripts/generate-site.js
 
-   物件の間取り・エリア・こだわり条件の種類を増やす場合は、
-   下記の AREA_OPTIONS / MADORI_OPTIONS / FEATURE_OPTIONS も
-   あわせて更新してください(物件一覧の絞り込みUIとチャットボットの
-   条件選択パネルの両方がここを参照します)。
+   ディレクトリ構成(今後の機能追加を見据えた構成):
+     大阪不動産サイト/
+       index.html / properties.html / about.html / contact.html  … 主要ページ(手動管理)
+       properties/UMxxx.html                                     … 物件詳細ページ(自動生成)
+       assets/css/ , assets/js/ , assets/images/                 … 静的アセット
+       data/bukken.json                                          … 物件マスタデータ
+       scripts/generate-site.js                                  … 本スクリプト
+
+   物件の間取り・エリア・こだわり条件・賃料上限の選択肢を増やす場合は、
+   下記の AREA_OPTIONS / MADORI_OPTIONS / FEATURE_OPTIONS / RENT_CEILINGS を
+   更新してください(物件一覧の絞り込みUIと index.html のヒーロー検索の
+   選択肢を、手動で揃えておく必要があります)。
    ========================================================================== */
 
 const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
-const bukken = JSON.parse(fs.readFileSync(path.join(ROOT, "bukken.json"), "utf8"));
+const bukken = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "bukken.json"), "utf8"));
 
 function extractStation(access) {
   const m = access.match(/^([^\s]+駅)/);
@@ -34,40 +41,33 @@ function extractNeighborhood(address) {
   return m ? m[1].trim() : "";
 }
 
-const RENT_BANDS = [
-  { key: "0-80000", label: "〜8万円", min: 0, max: 80000 },
-  { key: "80000-100000", label: "8万円〜10万円", min: 80000, max: 100000 },
-  { key: "100000-130000", label: "10万円〜13万円", min: 100000, max: 130000 },
-  { key: "130000-160000", label: "13万円〜16万円", min: 130000, max: 160000 },
-  { key: "160000-999999999", label: "16万円〜", min: 160000, max: Infinity },
+// 物件一覧の絞り込み(賃料の上限プルダウン)で使う選択肢。
+// index.html のヒーロー検索の賃料セレクトとも値を揃えること。
+const RENT_CEILINGS = [
+  { value: 80000, label: "8万円以下" },
+  { value: 100000, label: "10万円以下" },
+  { value: 130000, label: "13万円以下" },
+  { value: 160000, label: "16万円以下" },
+  { value: 200000, label: "20万円以下" },
 ];
 
-// 物件一覧の絞り込み・チャットボットの条件選択パネルの双方で使う共通の選択肢。
-// ここを1箇所にまとめることで、両者の選択肢がずれるのを防ぐ。
+// 物件一覧の絞り込みで使う共通の選択肢(エリア・間取り・こだわり条件は複数選択のチェックボックス)。
 const AREA_OPTIONS = ["梅田駅", "大阪駅", "中津駅"];
 const MADORI_OPTIONS = ["1K", "1DK", "2DK", "1LDK", "2LDK", "3LDK"];
 const FEATURE_OPTIONS = ["ペット可", "オートロック", "宅配ボックス", "浴室乾燥", "床暖房", "ネット無料"];
 
-function getRentBand(rent) {
-  const band = RENT_BANDS.find((b) => rent >= b.min && rent < b.max) || RENT_BANDS[RENT_BANDS.length - 1];
-  return band.key;
-}
-
 const properties = bukken.properties.map((p) => {
   const station = extractStation(p.access);
   const neighborhood = extractNeighborhood(p.address);
-  const areaKeywords = Array.from(new Set([station, station.replace("駅", ""), neighborhood].filter(Boolean)));
   const rentManYen = Math.round((p.rent / 1000)) / 10; // e.g. 118000 -> 11.8
   return {
     id: p.id,
     name: p.name,
     station,
-    areaKeywords,
     neighborhood,
     address: p.address,
     access: p.access,
     rent: p.rent,
-    rentBand: getRentBand(p.rent),
     maintenanceFee: p.maintenanceFee,
     rentManYen,
     layout: p.layout,
@@ -75,31 +75,11 @@ const properties = bukken.properties.map((p) => {
     age: p.age,
     features: p.features,
     description: p.description,
-    url: `property-${p.id}.html`,
-    image: `images/${p.id}.svg`,
   };
 });
 
 // ---------------------------------------------------------------------------
-// 1. js/properties-data.js
-// ---------------------------------------------------------------------------
-const dataJs = `/* ==========================================================================
-   物件データ(bukken.json由来のダミー賃貸物件情報)
-   物件一覧・チャットボットの双方から参照する共通データです。
-   ========================================================================== */
-
-const RENT_BANDS = ${JSON.stringify(RENT_BANDS.map(({ key, label }) => ({ key, label })), null, 2)};
-const AREA_OPTIONS = ${JSON.stringify(AREA_OPTIONS)};
-const MADORI_OPTIONS = ${JSON.stringify(MADORI_OPTIONS)};
-const FEATURE_OPTIONS = ${JSON.stringify(FEATURE_OPTIONS)};
-
-const PROPERTIES = ${JSON.stringify(properties, null, 2)};
-`;
-fs.writeFileSync(path.join(ROOT, "js", "properties-data.js"), dataJs, "utf8");
-console.log("wrote js/properties-data.js");
-
-// ---------------------------------------------------------------------------
-// 2. images/UMxxx.svg (ダミー建物イメージ)
+// 1. assets/images/UMxxx.svg (ダミー建物イメージ)
 // ---------------------------------------------------------------------------
 const palette = [
   ["#7c93bd", "#c8d3e6", "#16294f", "#c99a68"],
@@ -155,21 +135,32 @@ function buildingSvg(label, sub, colors) {
 properties.forEach((p, i) => {
   const colors = palette[i % palette.length];
   const svg = buildingSvg(p.name, "IMAGE SAMPLE", colors);
-  fs.writeFileSync(path.join(ROOT, "images", `${p.id}.svg`), svg, "utf8");
+  fs.writeFileSync(path.join(ROOT, "assets", "images", `${p.id}.svg`), svg, "utf8");
 });
 console.log(`wrote ${properties.length} placeholder images`);
 
 // ---------------------------------------------------------------------------
 // 共通ヘッダー / フッター
+// depth: 0 = ルート直下のページ(index.html, properties.html など)
+//        1 = 1階層下のページ(properties/UMxxx.html)
 // ---------------------------------------------------------------------------
-function header(activeNav) {
+function assetPath(depth, relPath) {
+  return depth === 0 ? relPath : `../${relPath}`;
+}
+
+// 本サイトが実在の不動産会社・物件ではないことを示す注記。全ページの<body>直下に表示する。
+const noticeBanner =
+  '<div class="site-notice">本サイトはポートフォリオ制作用のダミーサイトです。掲載している物件・運営者情報はすべて架空のサンプルデータです。</div>';
+
+function header(activeNav, depth) {
+  const p = (rel) => assetPath(depth, rel);
   const navItem = (href, label) => {
     const current = activeNav === label ? ' aria-current="page"' : "";
-    return `        <li><a href="${href}"${current}>${label}</a></li>`;
+    return `        <li><a href="${p(href)}"${current}>${label}</a></li>`;
   };
   return `<header class="site-header">
   <div class="container">
-    <a href="index.html" class="site-logo">
+    <a href="${p("index.html")}" class="site-logo">
       <span class="logo-main">大阪不動産ナビ</span>
       <span class="logo-sub">運営者:田中一郎</span>
     </a>
@@ -194,7 +185,9 @@ ${navItem("contact.html", "お問い合わせ")}
 </header>`;
 }
 
-const footer = `<footer class="site-footer">
+function footer(depth) {
+  const p = (rel) => assetPath(depth, rel);
+  return `<footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
       <div>
@@ -204,10 +197,10 @@ const footer = `<footer class="site-footer">
       <div>
         <h4>サイトメニュー</h4>
         <ul>
-          <li><a href="index.html">ホーム</a></li>
-          <li><a href="properties.html">物件一覧</a></li>
-          <li><a href="about.html">運営者について</a></li>
-          <li><a href="contact.html">お問い合わせ</a></li>
+          <li><a href="${p("index.html")}">ホーム</a></li>
+          <li><a href="${p("properties.html")}">物件一覧</a></li>
+          <li><a href="${p("about.html")}">運営者について</a></li>
+          <li><a href="${p("contact.html")}">お問い合わせ</a></li>
         </ul>
       </div>
       <div>
@@ -235,23 +228,25 @@ const footer = `<footer class="site-footer">
   </div>
 </footer>
 
-<script src="js/properties-data.js"></script>
-<script src="js/script.js"></script>
-<script src="js/chatbot.js"></script>
+<script src="${p("assets/js/script.js")}"></script>
 </body>
 </html>
 `;
+}
 
 const yen = (n) => n.toLocaleString("ja-JP");
 
 // ---------------------------------------------------------------------------
-// 3. 物件一覧カード(properties.html用)
+// 2. 物件一覧カード
+//    hrefPrefix / imgPrefix はカードを埋め込むページの階層によって変わる。
+//      ルート直下のページから埋め込む場合: href="properties/UMxxx.html", img="assets/images/UMxxx.svg"
+//      properties/UMxxx.html(関連物件)から埋め込む場合: href="UMxxx.html", img="../assets/images/UMxxx.svg"
 // ---------------------------------------------------------------------------
-function propertyCard(p, badge) {
+function propertyCard(p, badge, hrefPrefix, imgPrefix) {
   const badgeHtml = badge ? `\n          <span class="badge">${badge}</span>` : "";
-  return `      <a class="property-card" href="${p.url}" data-area="${p.station}" data-madori="${p.layout}" data-rent="${p.rent}" data-rent-band="${p.rentBand}" data-features="${p.features.join(",")}">
+  return `      <a class="property-card" href="${hrefPrefix}${p.id}.html" data-area="${p.station}" data-madori="${p.layout}" data-rent="${p.rent}" data-features="${p.features.join(",")}">
         <div class="thumb">${badgeHtml}
-          <img src="${p.image}" alt="${p.name} 外観イメージ">
+          <img src="${imgPrefix}${p.id}.svg" alt="${p.name} 外観イメージ">
         </div>
         <div class="body">
           <div class="area">${p.address} / ${p.access}</div>
@@ -266,7 +261,7 @@ function propertyCard(p, badge) {
       </a>`;
 }
 
-const cardsHtml = properties.map((p) => propertyCard(p, null)).join("\n\n");
+const cardsHtml = properties.map((p) => propertyCard(p, null, "properties/", "assets/images/")).join("\n\n");
 
 const propertiesHtml = `<!DOCTYPE html>
 <html lang="ja">
@@ -274,12 +269,14 @@ const propertiesHtml = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>物件一覧 | 大阪不動産ナビ</title>
-<meta name="description" content="大阪市北区(梅田・大阪駅・中津エリア)の賃貸物件一覧。エリア・間取り・賃料・こだわり条件から絞り込んで、理想のお部屋を探せます。">
-<link rel="stylesheet" href="css/style.css">
+<meta name="description" content="大阪市北区(梅田・大阪駅・中津エリア)の賃貸物件一覧。エリア・間取り・賃料上限・こだわり条件から絞り込んで、理想のお部屋を探せます。">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-${header("物件一覧")}
+${noticeBanner}
+
+${header("物件一覧", 0)}
 
 <div class="breadcrumb">
   <div class="container">
@@ -309,10 +306,11 @@ ${MADORI_OPTIONS.map((v) => `          <label><input type="checkbox" name="mador
         </div>
       </div>
       <div class="filter-group">
-        <span class="filter-group-title">賃料</span>
-        <div class="filter-checks">
-${RENT_BANDS.map((b) => `          <label><input type="checkbox" name="rentband" value="${b.key}">${b.label}</label>`).join("\n")}
-        </div>
+        <span class="filter-group-title">賃料上限</span>
+        <select name="rentmax" class="select-input">
+          <option value="">指定なし</option>
+${RENT_CEILINGS.map((r) => `          <option value="${r.value}">${r.label}</option>`).join("\n")}
+        </select>
       </div>
       <div class="filter-group">
         <span class="filter-group-title">こだわり条件</span>
@@ -344,13 +342,13 @@ ${cardsHtml}
   </div>
 </section>
 
-${footer}`;
+${footer(0)}`;
 
 fs.writeFileSync(path.join(ROOT, "properties.html"), propertiesHtml, "utf8");
 console.log("wrote properties.html");
 
 // ---------------------------------------------------------------------------
-// 4. 物件詳細ページ(property-UMxxx.html) x15
+// 3. 物件詳細ページ(properties/UMxxx.html)
 // ---------------------------------------------------------------------------
 function relatedCards(current) {
   const others = properties.filter((p) => p.id !== current.id);
@@ -358,15 +356,7 @@ function relatedCards(current) {
   const sameStation = others.filter((p) => p.station === current.station);
   const rest = others.filter((p) => p.station !== current.station);
   const picks = [...sameStation, ...rest].slice(0, 3);
-  return picks.map((p) => `      <a class="property-card" href="${p.url}">
-        <div class="thumb"><img src="${p.image}" alt="${p.name} 外観イメージ"></div>
-        <div class="body">
-          <div class="area">${p.address} / ${p.access}</div>
-          <h3>${p.name}</h3>
-          <div class="price">${p.rentManYen}<span>万円/月</span></div>
-          <div class="meta"><span>${p.layout}</span><span>${p.areaSqm}㎡</span><span>${p.age}</span></div>
-        </div>
-      </a>`).join("\n");
+  return picks.map((p) => propertyCard(p, null, "", "../assets/images/")).join("\n");
 }
 
 function detailPage(p) {
@@ -378,15 +368,17 @@ function detailPage(p) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${p.name} | 大阪不動産ナビ</title>
 <meta name="description" content="${p.address}、${p.access}の賃貸物件。${p.layout}・${p.areaSqm}㎡・賃料${p.rentManYen}万円/月。">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
 
-${header("物件一覧")}
+${noticeBanner}
+
+${header("物件一覧", 1)}
 
 <div class="breadcrumb">
   <div class="container">
-    <a href="index.html">ホーム</a> &gt; <a href="properties.html">物件一覧</a> &gt; <span class="current">${p.name}</span>
+    <a href="../index.html">ホーム</a> &gt; <a href="../properties.html">物件一覧</a> &gt; <span class="current">${p.name}</span>
   </div>
 </div>
 
@@ -400,11 +392,11 @@ ${header("物件一覧")}
 <div class="container">
   <div class="detail-gallery">
     <div class="main-photo">
-      <img src="${p.image}" alt="${p.name} 外観イメージ">
+      <img src="../assets/images/${p.id}.svg" alt="${p.name} 外観イメージ">
     </div>
     <div class="sub-photos">
-      <div><img src="images/room-a.svg" alt="リビングルームのイメージ"></div>
-      <div><img src="images/room-b.svg" alt="キッチンのイメージ"></div>
+      <div><img src="../assets/images/room-a.svg" alt="リビングルームのイメージ"></div>
+      <div><img src="../assets/images/room-b.svg" alt="キッチンのイメージ"></div>
     </div>
   </div>
 
@@ -434,7 +426,7 @@ ${header("物件一覧")}
       <div class="price-box">
         <div class="price">${p.rentManYen}万円<span style="font-size:1rem; font-weight:400;">/月</span></div>
         <div class="price-note">管理費 ${yen(p.maintenanceFee)}円/月は別途必要です</div>
-        <a href="contact.html" class="btn btn-primary btn-block">この物件の内見を申し込む</a>
+        <a href="../contact.html" class="btn btn-primary btn-block">この物件の内見を申し込む</a>
         <a href="tel:0612345678" class="btn btn-navy btn-block">電話で問い合わせる(06-1234-5678)</a>
       </div>
     </aside>
@@ -453,23 +445,23 @@ ${relatedCards(p)}
   </div>
 </section>
 
-${footer}`;
+${footer(1)}`;
 }
 
 properties.forEach((p) => {
-  fs.writeFileSync(path.join(ROOT, `property-${p.id}.html`), detailPage(p), "utf8");
+  fs.writeFileSync(path.join(ROOT, "properties", `${p.id}.html`), detailPage(p), "utf8");
 });
 console.log(`wrote ${properties.length} detail pages`);
 
 // ---------------------------------------------------------------------------
-// 5. index.html pickup 用スニペット & contact.html select 用スニペット出力
+// 4. index.html pickup 用スニペット & contact.html select 用スニペット出力
 // ---------------------------------------------------------------------------
 const pickupIds = ["UM012", "UM003", "UM001"]; // タワー / ペット可 / 定番1LDK
 const pickupHtml = pickupIds
   .map((id, i) => {
     const p = properties.find((x) => x.id === id);
     const badges = ["新着", "ペット可", "おすすめ"];
-    return propertyCard(p, badges[i]);
+    return propertyCard(p, badges[i], "properties/", "assets/images/");
   })
   .join("\n\n");
 

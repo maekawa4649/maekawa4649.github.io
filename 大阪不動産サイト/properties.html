@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>物件一覧 | 大阪不動産ナビ</title>
-<meta name="description" content="大阪市北区(梅田・大阪駅・中津エリア)の賃貸物件一覧。エリア・間取り・賃料・こだわり条件から絞り込んで、理想のお部屋を探せます。">
-<link rel="stylesheet" href="css/style.css">
+<meta name="description" content="大阪市北区(梅田・大阪駅・中津エリア)の賃貸物件一覧。エリア・間取り・賃料上限・こだわり条件から絞り込んで、理想のお部屋を探せます。">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+
+<div class="site-notice">本サイトはポートフォリオ制作用のダミーサイトです。掲載している物件・運営者情報はすべて架空のサンプルデータです。</div>
 
 <header class="site-header">
   <div class="container">
@@ -70,14 +72,15 @@
         </div>
       </div>
       <div class="filter-group">
-        <span class="filter-group-title">賃料</span>
-        <div class="filter-checks">
-          <label><input type="checkbox" name="rentband" value="0-80000">〜8万円</label>
-          <label><input type="checkbox" name="rentband" value="80000-100000">8万円〜10万円</label>
-          <label><input type="checkbox" name="rentband" value="100000-130000">10万円〜13万円</label>
-          <label><input type="checkbox" name="rentband" value="130000-160000">13万円〜16万円</label>
-          <label><input type="checkbox" name="rentband" value="160000-999999999">16万円〜</label>
-        </div>
+        <span class="filter-group-title">賃料上限</span>
+        <select name="rentmax" class="select-input">
+          <option value="">指定なし</option>
+          <option value="80000">8万円以下</option>
+          <option value="100000">10万円以下</option>
+          <option value="130000">13万円以下</option>
+          <option value="160000">16万円以下</option>
+          <option value="200000">20万円以下</option>
+        </select>
       </div>
       <div class="filter-group">
         <span class="filter-group-title">こだわり条件</span>
@@ -98,9 +101,9 @@
     <p class="result-count"><strong id="result-count">21</strong> 件の物件が見つかりました</p>
 
     <div class="property-grid">
-      <a class="property-card" href="property-UM001.html" data-area="梅田駅" data-madori="1LDK" data-rent="118000" data-rent-band="100000-130000" data-features="オートロック,宅配ボックス,浴室乾燥,ネット無料">
+      <a class="property-card" href="properties/UM001.html" data-area="梅田駅" data-madori="1LDK" data-rent="118000" data-features="オートロック,宅配ボックス,浴室乾燥,ネット無料">
         <div class="thumb">
-          <img src="images/UM001.svg" alt="グラン梅田レジデンス 外観イメージ">
+          <img src="assets/images/UM001.svg" alt="グラン梅田レジデンス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区芝田2丁目 / 梅田駅 徒歩5分</div>
@@ -114,9 +117,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM002.html" data-area="大阪駅" data-madori="1K" data-rent="85000" data-rent-band="80000-100000" data-features="独立洗面台,2口ガスコンロ,オートロック">
+      <a class="property-card" href="properties/UM002.html" data-area="大阪駅" data-madori="1K" data-rent="85000" data-features="独立洗面台,2口ガスコンロ,オートロック">
         <div class="thumb">
-          <img src="images/UM002.svg" alt="梅田ステーションハイツ 外観イメージ">
+          <img src="assets/images/UM002.svg" alt="梅田ステーションハイツ 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区角田町 / 大阪駅 徒歩6分</div>
@@ -130,9 +133,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM003.html" data-area="梅田駅" data-madori="1LDK" data-rent="132000" data-rent-band="130000-160000" data-features="ペット可,宅配ボックス,浴室乾燥,追い焚き">
+      <a class="property-card" href="properties/UM003.html" data-area="梅田駅" data-madori="1LDK" data-rent="132000" data-features="ペット可,宅配ボックス,浴室乾燥,追い焚き">
         <div class="thumb">
-          <img src="images/UM003.svg" alt="茶屋町アーバンコート 外観イメージ">
+          <img src="assets/images/UM003.svg" alt="茶屋町アーバンコート 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区茶屋町 / 梅田駅 徒歩4分</div>
@@ -146,9 +149,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM004.html" data-area="中津駅" data-madori="2LDK" data-rent="155000" data-rent-band="130000-160000" data-features="タワマン,コンシェルジュ,床暖房">
+      <a class="property-card" href="properties/UM004.html" data-area="中津駅" data-madori="2LDK" data-rent="155000" data-features="タワマン,コンシェルジュ,床暖房">
         <div class="thumb">
-          <img src="images/UM004.svg" alt="中津プレミアムタワー 外観イメージ">
+          <img src="assets/images/UM004.svg" alt="中津プレミアムタワー 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区中津1丁目 / 中津駅 徒歩2分</div>
@@ -162,9 +165,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM005.html" data-area="大阪駅" data-madori="1K" data-rent="79000" data-rent-band="0-80000" data-features="オートロック,IHコンロ,エレベーター">
+      <a class="property-card" href="properties/UM005.html" data-area="大阪駅" data-madori="1K" data-rent="79000" data-features="オートロック,IHコンロ,エレベーター">
         <div class="thumb">
-          <img src="images/UM005.svg" alt="大阪駅前シティハウス 外観イメージ">
+          <img src="assets/images/UM005.svg" alt="大阪駅前シティハウス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区梅田2丁目 / 大阪駅 徒歩3分</div>
@@ -178,9 +181,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM006.html" data-area="梅田駅" data-madori="1LDK" data-rent="124000" data-rent-band="100000-130000" data-features="ペット可,宅配ボックス,浴室乾燥">
+      <a class="property-card" href="properties/UM006.html" data-area="梅田駅" data-madori="1LDK" data-rent="124000" data-features="ペット可,宅配ボックス,浴室乾燥">
         <div class="thumb">
-          <img src="images/UM006.svg" alt="梅田ガーデンヒルズ 外観イメージ">
+          <img src="assets/images/UM006.svg" alt="梅田ガーデンヒルズ 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区鶴野町 / 梅田駅 徒歩7分</div>
@@ -194,9 +197,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM007.html" data-area="中津駅" data-madori="1DK" data-rent="98000" data-rent-band="80000-100000" data-features="独立洗面台,2口コンロ,オートロック">
+      <a class="property-card" href="properties/UM007.html" data-area="中津駅" data-madori="1DK" data-rent="98000" data-features="独立洗面台,2口コンロ,オートロック">
         <div class="thumb">
-          <img src="images/UM007.svg" alt="北梅田コンフォートレジデンス 外観イメージ">
+          <img src="assets/images/UM007.svg" alt="北梅田コンフォートレジデンス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区豊崎3丁目 / 中津駅 徒歩4分</div>
@@ -210,9 +213,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM008.html" data-area="梅田駅" data-madori="2LDK" data-rent="168000" data-rent-band="160000-999999999" data-features="ペット可,床暖房,宅配ボックス">
+      <a class="property-card" href="properties/UM008.html" data-area="梅田駅" data-madori="2LDK" data-rent="168000" data-features="ペット可,床暖房,宅配ボックス">
         <div class="thumb">
-          <img src="images/UM008.svg" alt="梅田ロイヤルパーク 外観イメージ">
+          <img src="assets/images/UM008.svg" alt="梅田ロイヤルパーク 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区堂山町 / 梅田駅 徒歩6分</div>
@@ -226,9 +229,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM009.html" data-area="大阪駅" data-madori="1K" data-rent="69000" data-rent-band="0-80000" data-features="エレベーター,IHコンロ">
+      <a class="property-card" href="properties/UM009.html" data-area="大阪駅" data-madori="1K" data-rent="69000" data-features="エレベーター,IHコンロ">
         <div class="thumb">
-          <img src="images/UM009.svg" alt="大阪グランドスクエア 外観イメージ">
+          <img src="assets/images/UM009.svg" alt="大阪グランドスクエア 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区梅田1丁目 / 大阪駅 徒歩5分</div>
@@ -242,9 +245,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM010.html" data-area="梅田駅" data-madori="1LDK" data-rent="107000" data-rent-band="100000-130000" data-features="ネット無料,浴室乾燥,宅配ボックス">
+      <a class="property-card" href="properties/UM010.html" data-area="梅田駅" data-madori="1LDK" data-rent="107000" data-features="ネット無料,浴室乾燥,宅配ボックス">
         <div class="thumb">
-          <img src="images/UM010.svg" alt="茶屋町スマートレジデンス 外観イメージ">
+          <img src="assets/images/UM010.svg" alt="茶屋町スマートレジデンス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区茶屋町 / 梅田駅 徒歩3分</div>
@@ -258,9 +261,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM011.html" data-area="中津駅" data-madori="1K" data-rent="75000" data-rent-band="0-80000" data-features="オートロック,エアコン新品">
+      <a class="property-card" href="properties/UM011.html" data-area="中津駅" data-madori="1K" data-rent="75000" data-features="オートロック,エアコン新品">
         <div class="thumb">
-          <img src="images/UM011.svg" alt="中津エクセルハイツ 外観イメージ">
+          <img src="assets/images/UM011.svg" alt="中津エクセルハイツ 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区中津2丁目 / 中津駅 徒歩3分</div>
@@ -274,9 +277,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM012.html" data-area="梅田駅" data-madori="2LDK" data-rent="182000" data-rent-band="160000-999999999" data-features="タワマン,ジム,ラウンジ,床暖房">
+      <a class="property-card" href="properties/UM012.html" data-area="梅田駅" data-madori="2LDK" data-rent="182000" data-features="タワマン,ジム,ラウンジ,床暖房">
         <div class="thumb">
-          <img src="images/UM012.svg" alt="梅田スカイビュータワー 外観イメージ">
+          <img src="assets/images/UM012.svg" alt="梅田スカイビュータワー 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区芝田1丁目 / 梅田駅 徒歩2分</div>
@@ -290,9 +293,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM013.html" data-area="大阪駅" data-madori="1DK" data-rent="92000" data-rent-band="80000-100000" data-features="独立洗面台,宅配ボックス">
+      <a class="property-card" href="properties/UM013.html" data-area="大阪駅" data-madori="1DK" data-rent="92000" data-features="独立洗面台,宅配ボックス">
         <div class="thumb">
-          <img src="images/UM013.svg" alt="大阪駅前スマートハウス 外観イメージ">
+          <img src="assets/images/UM013.svg" alt="大阪駅前スマートハウス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区梅田3丁目 / 大阪駅 徒歩4分</div>
@@ -306,9 +309,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM014.html" data-area="中津駅" data-madori="1K" data-rent="88000" data-rent-band="80000-100000" data-features="2口ガスコンロ,オートロック">
+      <a class="property-card" href="properties/UM014.html" data-area="中津駅" data-madori="1K" data-rent="88000" data-features="2口ガスコンロ,オートロック">
         <div class="thumb">
-          <img src="images/UM014.svg" alt="豊崎アーバンレジデンス 外観イメージ">
+          <img src="assets/images/UM014.svg" alt="豊崎アーバンレジデンス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区豊崎4丁目 / 中津駅 徒歩6分</div>
@@ -322,9 +325,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM015.html" data-area="大阪駅" data-madori="1LDK" data-rent="146000" data-rent-band="130000-160000" data-features="ペット可,宅配ボックス,浴室乾燥,追い焚き">
+      <a class="property-card" href="properties/UM015.html" data-area="大阪駅" data-madori="1LDK" data-rent="146000" data-features="ペット可,宅配ボックス,浴室乾燥,追い焚き">
         <div class="thumb">
-          <img src="images/UM015.svg" alt="梅田プレミアムヒルズ 外観イメージ">
+          <img src="assets/images/UM015.svg" alt="梅田プレミアムヒルズ 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区堂島2丁目 / 大阪駅 徒歩7分</div>
@@ -338,9 +341,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM016.html" data-area="梅田駅" data-madori="2DK" data-rent="115000" data-rent-band="100000-130000" data-features="オートロック,宅配ボックス,ネット無料">
+      <a class="property-card" href="properties/UM016.html" data-area="梅田駅" data-madori="2DK" data-rent="115000" data-features="オートロック,宅配ボックス,ネット無料">
         <div class="thumb">
-          <img src="images/UM016.svg" alt="梅田セントラルレジデンス 外観イメージ">
+          <img src="assets/images/UM016.svg" alt="梅田セントラルレジデンス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区曽根崎2丁目 / 梅田駅 徒歩8分</div>
@@ -354,9 +357,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM017.html" data-area="中津駅" data-madori="3LDK" data-rent="178000" data-rent-band="160000-999999999" data-features="ペット可,宅配ボックス,エレベーター">
+      <a class="property-card" href="properties/UM017.html" data-area="中津駅" data-madori="3LDK" data-rent="178000" data-features="ペット可,宅配ボックス,エレベーター">
         <div class="thumb">
-          <img src="images/UM017.svg" alt="中津ファミリーコート 外観イメージ">
+          <img src="assets/images/UM017.svg" alt="中津ファミリーコート 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区中津3丁目 / 中津駅 徒歩9分</div>
@@ -370,9 +373,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM018.html" data-area="大阪駅" data-madori="2LDK" data-rent="195000" data-rent-band="160000-999999999" data-features="タワマン,床暖房,宅配ボックス,エレベーター">
+      <a class="property-card" href="properties/UM018.html" data-area="大阪駅" data-madori="2LDK" data-rent="195000" data-features="タワマン,床暖房,宅配ボックス,エレベーター">
         <div class="thumb">
-          <img src="images/UM018.svg" alt="大阪駅前レジデンスタワー 外観イメージ">
+          <img src="assets/images/UM018.svg" alt="大阪駅前レジデンスタワー 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区梅田4丁目 / 大阪駅 徒歩5分</div>
@@ -386,9 +389,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM019.html" data-area="梅田駅" data-madori="1K" data-rent="72000" data-rent-band="0-80000" data-features="エアコン新品,エレベーター">
+      <a class="property-card" href="properties/UM019.html" data-area="梅田駅" data-madori="1K" data-rent="72000" data-features="エアコン新品,エレベーター">
         <div class="thumb">
-          <img src="images/UM019.svg" alt="茶屋町コンパクトハウス 外観イメージ">
+          <img src="assets/images/UM019.svg" alt="茶屋町コンパクトハウス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区茶屋町 / 梅田駅 徒歩6分</div>
@@ -402,9 +405,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM020.html" data-area="中津駅" data-madori="2DK" data-rent="129000" data-rent-band="100000-130000" data-features="ペット可,浴室乾燥,宅配ボックス">
+      <a class="property-card" href="properties/UM020.html" data-area="中津駅" data-madori="2DK" data-rent="129000" data-features="ペット可,浴室乾燥,宅配ボックス">
         <div class="thumb">
-          <img src="images/UM020.svg" alt="中津グリーンテラス 外観イメージ">
+          <img src="assets/images/UM020.svg" alt="中津グリーンテラス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区中津4丁目 / 中津駅 徒歩7分</div>
@@ -418,9 +421,9 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM021.html" data-area="大阪駅" data-madori="1LDK" data-rent="158000" data-rent-band="130000-160000" data-features="床暖房,宅配ボックス,浴室乾燥,ネット無料">
+      <a class="property-card" href="properties/UM021.html" data-area="大阪駅" data-madori="1LDK" data-rent="158000" data-features="床暖房,宅配ボックス,浴室乾燥,ネット無料">
         <div class="thumb">
-          <img src="images/UM021.svg" alt="堂島リバーサイドヒルズ 外観イメージ">
+          <img src="assets/images/UM021.svg" alt="堂島リバーサイドヒルズ 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区堂島3丁目 / 大阪駅 徒歩9分</div>
@@ -489,8 +492,6 @@
   </div>
 </footer>
 
-<script src="js/properties-data.js"></script>
-<script src="js/script.js"></script>
-<script src="js/chatbot.js"></script>
+<script src="assets/js/script.js"></script>
 </body>
 </html>

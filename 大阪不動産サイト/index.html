@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>大阪不動産ナビ | 梅田・大阪駅・中津エリアの賃貸物件情報</title>
 <meta name="description" content="大阪市北区(梅田・大阪駅・中津エリア)の賃貸情報サイト。個人運営ならではのきめ細かなご案内で、理想のお部屋探しをサポートします。">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+
+<div class="site-notice">本サイトはポートフォリオ制作用のダミーサイトです。掲載している物件・運営者情報はすべて架空のサンプルデータです。</div>
 
 <header class="site-header">
   <div class="container">
@@ -46,51 +48,45 @@
         <a href="contact.html" class="btn btn-outline">無料相談する</a>
       </div>
     </div>
-    <div class="hero-image">
-      <img src="images/hero.svg" alt="大阪の街並みイメージイラスト" width="900" height="700">
+    <div class="hero-search">
+      <form action="properties.html" method="get">
+        <div class="search-field">
+          <label for="s-area">エリア(最寄り駅)</label>
+          <select id="s-area" name="area" class="select-input">
+            <option value="">指定なし</option>
+            <option value="梅田駅">梅田駅</option>
+            <option value="大阪駅">大阪駅</option>
+            <option value="中津駅">中津駅</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label for="s-madori">間取り</label>
+          <select id="s-madori" name="madori" class="select-input">
+            <option value="">指定なし</option>
+            <option value="1K">1K</option>
+            <option value="1DK">1DK</option>
+            <option value="2DK">2DK</option>
+            <option value="1LDK">1LDK</option>
+            <option value="2LDK">2LDK</option>
+            <option value="3LDK">3LDK</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label for="s-rent">賃料上限</label>
+          <select id="s-rent" name="rentmax" class="select-input">
+            <option value="">指定なし</option>
+            <option value="80000">8万円以下</option>
+            <option value="100000">10万円以下</option>
+            <option value="130000">13万円以下</option>
+            <option value="160000">16万円以下</option>
+            <option value="200000">20万円以下</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-navy">検索する</button>
+      </form>
     </div>
   </div>
 </section>
-
-<div class="container">
-  <div class="search-box">
-    <form action="properties.html" method="get">
-      <div class="search-field">
-        <label for="s-area">エリア(最寄り駅)</label>
-        <select id="s-area" name="area">
-          <option value="">指定なし</option>
-          <option value="梅田駅">梅田駅</option>
-          <option value="大阪駅">大阪駅</option>
-          <option value="中津駅">中津駅</option>
-        </select>
-      </div>
-      <div class="search-field">
-        <label for="s-madori">間取り</label>
-        <select id="s-madori" name="madori">
-          <option value="">指定なし</option>
-          <option value="1K">1K</option>
-          <option value="1DK">1DK</option>
-          <option value="2DK">2DK</option>
-          <option value="1LDK">1LDK</option>
-          <option value="2LDK">2LDK</option>
-          <option value="3LDK">3LDK</option>
-        </select>
-      </div>
-      <div class="search-field">
-        <label for="s-rent">賃料</label>
-        <select id="s-rent" name="rentband">
-          <option value="">指定なし</option>
-          <option value="0-80000">〜8万円</option>
-          <option value="80000-100000">8万円〜10万円</option>
-          <option value="100000-130000">10万円〜13万円</option>
-          <option value="130000-160000">13万円〜16万円</option>
-          <option value="160000-999999999">16万円〜</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-navy">検索する</button>
-    </form>
-  </div>
-</div>
 
 <section class="section">
   <div class="container">
@@ -134,10 +130,10 @@
     </div>
     <div class="property-grid">
 
-      <a class="property-card" href="property-UM012.html">
+      <a class="property-card" href="properties/UM012.html">
         <div class="thumb">
           <span class="badge">新着</span>
-          <img src="images/UM012.svg" alt="梅田スカイビュータワー 外観イメージ">
+          <img src="assets/images/UM012.svg" alt="梅田スカイビュータワー 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区芝田1丁目 / 梅田駅 徒歩2分</div>
@@ -151,10 +147,10 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM003.html">
+      <a class="property-card" href="properties/UM003.html">
         <div class="thumb">
           <span class="badge">ペット可</span>
-          <img src="images/UM003.svg" alt="茶屋町アーバンコート 外観イメージ">
+          <img src="assets/images/UM003.svg" alt="茶屋町アーバンコート 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区茶屋町 / 梅田駅 徒歩4分</div>
@@ -168,10 +164,10 @@
         </div>
       </a>
 
-      <a class="property-card" href="property-UM001.html">
+      <a class="property-card" href="properties/UM001.html">
         <div class="thumb">
           <span class="badge">おすすめ</span>
-          <img src="images/UM001.svg" alt="グラン梅田レジデンス 外観イメージ">
+          <img src="assets/images/UM001.svg" alt="グラン梅田レジデンス 外観イメージ">
         </div>
         <div class="body">
           <div class="area">大阪市北区芝田2丁目 / 梅田駅 徒歩5分</div>
@@ -244,8 +240,6 @@
   </div>
 </footer>
 
-<script src="js/properties-data.js"></script>
-<script src="js/script.js"></script>
-<script src="js/chatbot.js"></script>
+<script src="assets/js/script.js"></script>
 </body>
 </html>
