@@ -5,5 +5,19 @@
       "Bash(taskkill //F //IM python.exe //T)",
       "Bash(python -m http.server 8792)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/check_html.py 2>/dev/null || true",
+            "statusMessage": "HTML構文をチェック中..."
+          }
+        ]
+      }
+    ]
   }
 }

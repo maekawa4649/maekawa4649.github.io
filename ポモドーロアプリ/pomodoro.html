@@ -447,6 +447,7 @@
       totalSeconds = getMinutesForMode(mode) * 60;
       remaining = totalSeconds;
       updateDisplay();
+      saveState();
     }
   }
 
@@ -493,6 +494,7 @@
     // setIntervalは1000msより短い周期にしておくと、間隔のずれが蓄積しても
     // 表示上の遅延が目立ちにくい(実際の残り時間は常にendTimeから逆算する)
     timerId = setInterval(tick, 250);
+    saveState();
   }
 
   function pause() {
@@ -500,6 +502,7 @@
     startPauseBtn.textContent = '開始';
     clearInterval(timerId);
     releaseWakeLock();
+    saveState();
   }
 
   function reset() {
@@ -508,6 +511,61 @@
     remaining = totalSeconds;
     endTime = null;
     updateDisplay();
+    saveState();
+  }
+
+  // スマホでバックグラウンドに回すとOS/ブラウザがJS実行自体を止めてしまい、
+  // 復帰時にページが再読み込みされて実行中のタイマー状態が消えることがある(iOSのPWAで顕著)。
+  // そうなると通知も次セッションの自動開始も発生しないため、状態をlocalStorageに保存しておき、
+  // 再読み込み後に「経過時間を追いつかせる」ことで、戻ってきた時点で正しい状態に復元する
+  const STORAGE_KEY = 'pomodoroState';
+
+  function saveState() {
+    const state = {
+      currentMode,
+      totalSeconds,
+      remaining,
+      running,
+      endTime,
+      completedWorkSessions,
+      workMin: workInput.value,
+      shortMin: shortInput.value,
+      longMin: longInput.value,
+      notify: notifyToggle.checked,
+      autoStart: autoStartToggle.checked,
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function loadState() {
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) { saved = null; }
+    if (!saved) return false;
+
+    if (saved.workMin) workInput.value = saved.workMin;
+    if (saved.shortMin) shortInput.value = saved.shortMin;
+    if (saved.longMin) longInput.value = saved.longMin;
+    notifyToggle.checked = saved.notify !== false;
+    autoStartToggle.checked = saved.autoStart !== false;
+    completedWorkSessions = saved.completedWorkSessions || 0;
+
+    setMode(saved.currentMode || 'work', false);
+    totalSeconds = saved.totalSeconds || totalSeconds;
+    remaining = typeof saved.remaining === 'number' ? saved.remaining : remaining;
+    renderDots();
+    updateDisplay();
+
+    if (saved.running && saved.endTime) {
+      running = true;
+      endTime = saved.endTime;
+      startPauseBtn.textContent = '一時停止';
+      requestWakeLock();
+      timerId = setInterval(tick, 250);
+      // 保存時点から今までの経過分を即座に反映する。
+      // すでに終了時刻を過ぎていればここでhandleSessionComplete経由の通知・自動開始が走る
+      tick();
+    }
+    return true;
   }
 
   startPauseBtn.addEventListener('click', () => {
@@ -519,7 +577,10 @@
   notifyToggle.addEventListener('change', () => {
     if (notifyToggle.checked) ensureNotificationPermission();
     updateNotifyStatus();
+    saveState();
   });
+
+  autoStartToggle.addEventListener('change', saveState);
 
   modeTabs.forEach(tab => {
     tab.addEventListener('click', () => setMode(tab.dataset.mode));
@@ -532,11 +593,14 @@
         remaining = totalSeconds;
         updateDisplay();
       }
+      saveState();
     });
   });
 
   renderDots();
-  setMode('work');
+  if (!loadState()) {
+    setMode('work');
+  }
 })();
 </script>
 
